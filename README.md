@@ -61,6 +61,36 @@ python main.py pack ./folder archive.sarc --iterations 500000
 
 ### Password Management
 
+#### Interactive password selection (recommended for packing)
+When packing an archive, the tool will offer:
+- 3 auto-generated strong passwords to choose from
+- Option to enter a custom password
+- Optional save to `password.txt` for convenient unpacking
+
+```bash
+python main.py pack ./folder archive.sarc
+
+# You will see:
+#   Suggested passwords:
+#     1. Xy7!kL@9mN#4pQ&2zR*8  [very strong, 103 bits]
+#     2. aB3$cD5%eF7&gH9(iJ1)  [very strong, 103 bits]
+#     3. Mn2@Op4!Qr6#St8$Uv0%  [very strong, 103 bits]
+#
+#   Options:
+#     1-3: Use suggested password
+#     c:   Enter custom password
+```
+
+#### Unpacking with saved password (Windows tip)
+On Windows, password paste doesn't work in secure input mode. The tool offers to load the password from `password.txt`:
+
+```bash
+python main.py unpack archive.sarc ./output
+
+# Or use the --password flag:
+python main.py unpack archive.sarc ./output --password "your_password"
+```
+
 #### Generate strong passwords
 ```bash
 python main.py genpass
@@ -177,20 +207,24 @@ The LSB (Least Significant Bit) steganography method embeds data into the least 
 ### Complete Workflow
 
 ```bash
-# 1. Generate a strong password
-python main.py genpass --length 20
-
-# 2. Pack directory with LZMA compression
+# 1. Pack directory (interactive password selection)
 python main.py pack ./secret_docs archive.sarc --lzma
+# Choose password option 1-3 or enter custom
+# Save to password.txt? (y/n): y
 
-# 3. Hide archive in image
+# 2. Hide archive in image
 python main.py hide archive.sarc vacation.jpg hidden.png
 
-# 4. Later: extract archive from image
+# 3. Later: extract archive from image
 python main.py reveal hidden.png recovered.sarc
 
-# 5. Unpack archive
+# 4. Unpack archive (load password from file)
 python main.py unpack recovered.sarc ./restored_docs
+# Load password from password.txt? (y/n): y
+
+# 5. Clean up password file when done
+# Windows: del password.txt
+# Linux/Mac: rm password.txt
 ```
 
 ### Security-Focused Workflow
@@ -215,6 +249,29 @@ The tool provides detailed error messages for:
 - Insufficient image capacity
 - Format errors
 
+## Platform-Specific Notes
+
+### Windows Users
+
+**Password Input**: On Windows, Ctrl+V paste doesn't work in secure password input. Solutions:
+1. **Recommended**: Use interactive password selection (options 1-3) when packing
+2. Save password to `password.txt` and load it when unpacking
+3. Use `--password` flag (less secure, visible in command history)
+
+**Example**:
+```cmd
+# Packing - choose option 1, 2, or 3
+python main.py pack "C:\Users\YourName\Documents" "C:\Users\YourName\archive.sarc"
+
+# Unpacking - load from password.txt
+python main.py unpack "C:\Users\YourName\archive.sarc" "C:\Users\YourName\extracted"
+```
+
+**Path handling**: Use quotes for paths with spaces:
+```cmd
+python main.py pack "C:\My Documents\data" archive.sarc
+```
+
 ## Performance Notes
 
 - **zlib**: Fast compression, good for most use cases
@@ -231,11 +288,13 @@ This project is provided as-is for educational purposes.
 ## Security Notice
 
 This tool is designed for legitimate security purposes. Always:
-- Use strong, unique passwords
-- Store passwords securely (use a password manager)
+- Use strong, unique passwords (or choose from auto-generated options)
+- Store passwords securely in a password manager
+- The `password.txt` file is convenient but temporary - delete after use
 - Test with non-critical data first
 - Keep backups of important data
 - Never share your password via insecure channels
+- On shared computers, avoid using `--password` flag (visible in command history)
 
 ## Contributing
 
